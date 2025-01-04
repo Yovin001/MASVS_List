@@ -2,7 +2,7 @@
 module.exports = (sequelize, DataTypes) => {
     const role = sequelize.define('role', {
         external_id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 ,unique: true},
-        status: {type: DataTypes.BOOLEAN, defaultValue: true},
+        state: {type: DataTypes.BOOLEAN, defaultValue: true},
         name: {type: DataTypes.STRING(20), defaultValue: "NO_DATA"}
     }, {
         freezeTableName: true
