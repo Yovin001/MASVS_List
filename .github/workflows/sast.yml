@@ -48,11 +48,11 @@ jobs:
         uses: github/codeql-action/init@v2
         with:
           languages: "javascript"
-          path: "inclusionlectora_web"
+          path: "masvs-list-web"
 
       - name: Install Dependencies for Web
         run: |
-          cd inclusionlectora_web
+          cd masvs-list-web
           npm install
 
       - name: CodeQL Analysis for Web
@@ -85,12 +85,12 @@ jobs:
 
       - name: Install ESLint for Web
         run: |
-          cd inclusionlectora_web
+          cd masvs-list-web
           npm install eslint --save-dev
 
       - name: Run ESLint for Web
         run: |
-          cd inclusionlectora_web
+          cd masvs-list-web
           npx eslint . --format json -o eslint-results-web.json || true
 
       - name: Upload ESLint Results for API
@@ -103,4 +103,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: eslint-results-web-json
-          path: inclusionlectora_web/eslint-results-web.json
+          path: masvs-list-web/eslint-results-web.json
