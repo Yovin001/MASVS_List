@@ -1,0 +1,61 @@
+name: 04 SAST - Web
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  SAST-CodeQL-Web:
+    name: Build and SAST CodeQL for Web
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL for Web
+        uses: github/codeql-action/init@v2
+        with:
+          languages: "javascript"
+          path: "masvs-list-web"
+
+      - name: Install Dependencies for Web
+        run: |
+          cd masvs-list-web
+          npm install
+
+      - name: CodeQL Analysis for Web
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:javascript-web"
+
+  sast-eslint-web:
+    name: SAST ESLint - Web
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ESLint for Web
+        run: |
+          cd masvs-list-web
+          npm install eslint --save-dev
+
+      - name: Run ESLint for Web
+        run: |
+          cd masvs-list-web
+          npx eslint . --format json -o eslint-results.json || true
+
+      - name: Upload ESLint Results for Web
+        uses: actions/upload-artifact@v3
+        with:
+          name: eslint-results-json
+          path: masvs-list-web/eslint-results.json

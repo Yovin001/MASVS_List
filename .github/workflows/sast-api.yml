@@ -1,0 +1,61 @@
+name: 04 SAST - API
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  SAST-CodeQL-API:
+    name: Build and SAST CodeQL for API
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL for API
+        uses: github/codeql-action/init@v2
+        with:
+          languages: "javascript"
+          path: "masvs-list-api"
+
+      - name: Install Dependencies for API
+        run: |
+          cd masvs-list-api
+          npm install
+
+      - name: CodeQL Analysis for API
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:javascript-api"
+
+  sast-eslint-api:
+    name: SAST ESLint - API
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ESLint for API
+        run: |
+          cd masvs-list-api
+          npm install eslint --save-dev
+
+      - name: Run ESLint for API
+        run: |
+          cd masvs-list-api
+          npx eslint . --format json -o eslint-results.json || true
+
+      - name: Upload ESLint Results for API
+        uses: actions/upload-artifact@v3
+        with:
+          name: eslint-results-json
+          path: masvs-list-api/eslint-results.json

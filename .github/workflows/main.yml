@@ -16,7 +16,11 @@ permissions:
 
 jobs:
 
-  sast:
-    name: SAST
-    uses: ./.github/workflows/sast.yml
+  sast-api:
+    name: SAST-API
+    uses: ./.github/workflows/sast-api.yml
+    secrets: inherit
+  sast-web:
+    name: SAST-WEB
+    uses: ./.github/workflows/sast-web.yml
     secrets: inherit
