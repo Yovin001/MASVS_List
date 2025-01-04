@@ -1,0 +1,106 @@
+name: 04 SAST
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  SAST-CodeQL-API:
+    name: Build and SAST CodeQL for API
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL for API
+        uses: github/codeql-action/init@v2
+        with:
+          languages: "javascript"
+          path: "masvs-list-api"
+
+      - name: Install Dependencies for API
+        run: |
+          cd masvs-list-api
+          npm install
+
+      - name: CodeQL Analysis for API
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:javascript-api"
+
+  SAST-CodeQL-Web:
+    name: Build and SAST CodeQL for Web
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL for Web
+        uses: github/codeql-action/init@v2
+        with:
+          languages: "javascript"
+          path: "inclusionlectora_web"
+
+      - name: Install Dependencies for Web
+        run: |
+          cd inclusionlectora_web
+          npm install
+
+      - name: CodeQL Analysis for Web
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:javascript-web"
+
+  sast-eslint:
+    name: SAST ESLint
+    needs: [SAST-CodeQL-API, SAST-CodeQL-Web]
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ESLint for API
+        run: |
+          cd masvs-list-api
+          npm install eslint --save-dev
+
+      - name: Run ESLint for API
+        run: |
+          cd masvs-list-api
+          npx eslint . --format json -o eslint-results-api.json || true
+
+      - name: Install ESLint for Web
+        run: |
+          cd inclusionlectora_web
+          npm install eslint --save-dev
+
+      - name: Run ESLint for Web
+        run: |
+          cd inclusionlectora_web
+          npx eslint . --format json -o eslint-results-web.json || true
+
+      - name: Upload ESLint Results for API
+        uses: actions/upload-artifact@v3
+        with:
+          name: eslint-results-api-json
+          path: masvs-list-api/eslint-results-api.json
+
+      - name: Upload ESLint Results for Web
+        uses: actions/upload-artifact@v3
+        with:
+          name: eslint-results-web-json
+          path: inclusionlectora_web/eslint-results-web.json
