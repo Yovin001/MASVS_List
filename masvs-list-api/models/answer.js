@@ -2,12 +2,12 @@
 const { UUIDV4 } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
     const answer = sequelize.define('answer', {
-        state: { type: DataTypes.BOOLEAN, defaultValue: true },
+        state: { type: DataTypes.BOOLEAN, defaultValue: false },
     }, {
         freezeTableName: true
     });
     answer.associate = function (models){
-        answer.hasMani(models.account, {foreignKey: 'account_id'});
+        answer.hasMany(models.account, {foreignKey: 'account_id'});
     }
     return answer;
 };
