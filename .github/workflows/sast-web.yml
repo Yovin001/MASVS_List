@@ -34,7 +34,7 @@ jobs:
 
   sast-eslint-web:
     name: SAST ESLint - Web
-    needs: [SAST-CodeQL]
+    needs: [SAST-CodeQL-Web]
     runs-on: ubuntu-latest
     permissions:
       actions: read
