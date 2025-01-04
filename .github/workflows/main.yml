@@ -15,7 +15,6 @@ permissions:
   packages: write
 
 jobs:
-
   sast-api:
     name: SAST-API
     uses: ./.github/workflows/sast-api.yml

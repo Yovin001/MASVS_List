@@ -30,10 +30,11 @@ jobs:
       - name: CodeQL Analysis for Web
         uses: github/codeql-action/analyze@v2
         with:
-          category: "/language:javascript-web"
+          category: "/language:javascript"
 
   sast-eslint-web:
     name: SAST ESLint - Web
+    needs: [SAST-CodeQL]
     runs-on: ubuntu-latest
     permissions:
       actions: read
