@@ -1,13 +1,11 @@
 import globals from "globals";
 import pluginJs from "@eslint/js";
-import pluginReact from "eslint-plugin-react";
-
+import pluginAstro from "eslint-plugin-astro";
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
-  {files: ['*.astro']},
-  {files: ["**/*.js"], languageOptions: {sourceType: "commonjs"}},
+  {files: ["**/*.{js,mjs,astro}"], languageOptions: {sourceType: "commonjs"}},
   {languageOptions: { globals: globals.browser }},
   pluginJs.configs.recommended,
-  pluginReact.configs.flat.recommended,
+  pluginAstro.configs.recommended,
 ];
