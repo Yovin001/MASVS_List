@@ -1,14 +1,110 @@
 ---
-import Layout from "@layouts/Layout.astro";
+import Layout from "../layouts/LayoutLogin.astro";
+import useConexion from "../utiles/hooks/Conexion";
 
+const conexion = useConexion();
+const errors = { email: "", password: "" };
 
+// Verificar si el usuario ya está autenticado
+const token = Astro.cookies.get("token");
+if (token) {
+  return Astro.redirect("/dashboard");
+}
+
+if (Astro.request.method === "POST") {
+  try {
+    const data = await Astro.request.formData();
+    const email = data.get("email");
+    const password = data.get("password");
+
+    // Validaciones simples
+    if (typeof email !== "string" || email.length < 1) {
+      errors.email += "Por favor, introduce un correo electrónico válido. ";
+    }
+    if (typeof password !== "string" || password.length < 6) {
+      errors.password += "La contraseña debe tener al menos 6 caracteres. ";
+    }
+
+    const hasErrors = Object.values(errors).some((msg) => msg);
+
+    if (!hasErrors) {
+      const response = await conexion.post("sesion", { email, password });
+
+      if (response?.code === 200) {
+        // Guardar cookies y redirigir
+        Astro.cookies.set("token", response.info.token, { httpOnly: true });
+        Astro.session.set("user", { name: response.info.user.last_name+" "+response.info.user.first_name, email: response.info.user.email, photo: response.info.user.user.photo, external_id: response.info.user.user.external_id });
+const user = Astro.session.get("user");
+        return Astro.redirect("/dashboard");
+      } else {
+        errors.email = "Correo o contraseña incorrectos.";
+        errors.password = "Correo o contraseña incorrectos.";
+      }
+    }
+  } catch (error) {
+    console.error("Error en el inicio de sesión:", error);
+    errors.email = "Ocurrió un error inesperado. Inténtalo nuevamente.";
+    errors.password = "Ocurrió un error inesperado. Inténtalo nuevamente.";
+  }
+}
 ---
 
 <Layout title="Login">
-  <main>
-<h1 class="text-center text-7xl font-extrabold"> Iniciar
-<span class="block" >Sesión</span>
-</h1>
+  <main class="flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md rounded-lg shadow-md p-8">
+      <h1 class="text-center text-3xl font-extrabold mb-6">
+        Iniciar <span class="block text-indigo-500">Sesión</span>
+      </h1>
 
+      <!-- Formulario de inicio de sesión -->
+      <form method="POST">
+        <div class="mb-4">
+          <label for="email" class="block text-sm font-medium mb-1">
+            Correo Electrónico
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="tucorreo@ejemplo.com"
+            class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            required
+          />
+          {errors.email && <p class="text-red-500 text-sm">{errors.email}</p>}
+        </div>
+        <div class="mb-6">
+          <label for="password" class="block text-sm font-medium mb-1">
+            Contraseña
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="••••••••"
+            class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            required
+          />
+          {errors.password && <p class="text-red-500 text-sm">{errors.password}</p>}
+        </div>
+        <button
+          type="submit"
+          class="w-full bg-indigo-500 py-2 px-4 rounded-lg hover:bg-indigo-600 transition"
+        >
+          Iniciar Sesión
+        </button>
+      </form>
+
+      <!-- Opciones adicionales -->
+      <div class="mt-6 text-center">
+        <a href="/forgot-password" class="text-sm text-indigo-500 hover:underline">
+          ¿Olvidaste tu contraseña?
+        </a>
+      </div>
+      <div class="mt-4 text-center">
+        <a href="/register" class="text-sm text-gray-500 hover:underline">
+          ¿No tienes una cuenta? <span class="text-indigo-500 font-semibold">Regístrate</span>
+        </a>
+      </div>
+    </div>
   </main>
 </Layout>
