@@ -1,0 +1,32 @@
+---
+export let modalId = "createProjectModal";
+---
+
+<div class="modal fade" id={modalId} tabindex="-1" aria-labelledby={`${modalId}Label`} aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id={`${modalId}Label`}>Crear Nuevo Proyecto</h5>
+        <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="createProjectForm">
+          <div class="mb-4">
+            <label for="projectName" class="form-label">Nombre del Proyecto:</label>
+            <input type="text" id="projectName" class="form-control" placeholder="Ingrese el nombre" required />
+          </div>
+          <div class="mb-4">
+            <label for="projectDescription" class="form-label">Descripción:</label>
+            <textarea id="projectDescription" class="form-control" placeholder="Ingrese la descripción" rows="4" required></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" id="createProjectButton" class="btn btn-primary">Crear</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+

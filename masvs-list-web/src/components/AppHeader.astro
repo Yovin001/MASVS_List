@@ -4,7 +4,7 @@ import Frame from "./Frame.astro";
 
 const links = [
     {
-        to: "/#home",
+        to: "/dashboard",
         label: "Proyectos",
     },
     {
@@ -16,7 +16,6 @@ const links = [
         label: "Información",
     },
 ];
-
 
 ---
 
@@ -86,6 +85,7 @@ const links = [
                             </div>
                         </Frame>
                     </div>
+                    <form onclick="">
                     <div
                         class="w-full my-6 border-t dark:border-[--ui-dark-border-color] pt-6 lg:mt-0 flex gap-2 lg:my-0 lg:border-none lg:pt-0"
                     >
@@ -98,10 +98,11 @@ const links = [
                         >
                             Sign In
                         </a>
-                        <a href="/register" class="w-full md:w-fit">
+                        <a href="/login" class="w-full md:w-fit">
                             Get Started
                         </a>
                     </div>
+                </form>
                 </div>
             </div>
         </Container>

@@ -17,6 +17,8 @@ const RoleEntityController = require('../controls/RoleEntityController');
 var rolEntityController = new RoleEntityController();
 const RequestController = require('../controls/RequestController');
 var peticionController = new RequestController();
+const ProjectController = require('../controls/ProjectController');
+var projectController = new ProjectController();
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -226,5 +228,11 @@ router.put('/cuenta/validar',[
 router.get('/peticion/:type', peticionController.listarRequestes);
 router.get('/aceptarechazar/peticiones/:external/:state/:rejection_reason/:approver_rejector_id', /*auth,*/ peticionController.aceptarRechazar);
 
+
+
+/**PROJECTS */
+
+router.get('/projects/:entity_external_id', projectController.getProjects);
+router.post('/project/:entity_external_id', projectController.addProject);
 
 module.exports = router;  

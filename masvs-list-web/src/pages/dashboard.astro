@@ -1,13 +1,139 @@
 ---
+import useConexion from "@utiles/hooks/Conexion";
 import Layout from "../layouts/Layout.astro";
+import ProjectContainer from "@components/container/ProjectContainer.astro";
 
+const conexion = useConexion();
+const errors = { projectTitle: "", projectDescription: "" };
 
+if (Astro.request.method === "POST") {
+  try {
+    const data = await Astro.request.formData();
+    const projectTitle = data.get("projectTitle");
+    const projectDescription = data.get("projectDescription");
+
+    // Validaciones simples
+    if (typeof projectTitle !== "string" || projectTitle.length > 20) {
+      errors.projectTitle += "El nombre de usuario debe tener como maximo 20 caracteres. ";
+    }
+    if (typeof projectDescription !== "string" || projectDescription.length > 100) {
+      errors.projectDescription += "La contraseña debe tener como maximo 100 caracteres. ";
+    }
+
+    const hasErrors = Object.values(errors).some((msg) => msg);
+
+    if (!hasErrors) {
+      const response = await conexion.post(`project/${Astro.cookies.get("user").json().external_id}`, { projectTitle, projectDescription });
+
+      if (response?.code === 200) {
+        document.getElementById('projectTitle').setAttribute('value', ''); 
+        document.getElementById('projectDescription').setAttribute('value', ''); 
+        Astro.redirect("/dashboard");
+      } else {
+        errors.projectTitle = "Nombre de proyecto ya existe.";
+      }
+    }
+  } catch (error) {
+    console.error("Error en el inicio de sesión:", error);
+    errors.projectTitle = "Ocurrió un error inesperado. Inténtalo nuevamente.";
+    errors.projectDescription = "Ocurrió un error inesperado. Inténtalo nuevamente.";
+  }
+}
 ---
 
 <Layout title="Dashboard">
-    <main class="space-y-16 sm:space-y-28 lg:space-y-32 pb-40 overflow-clip">
-        <div class="space-y-8">
-            <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
-            <p class="text-lg text-gray-700 dark:text-gray-300">Welcome to the dashboard.</p>
-        </div>
-    </main>
+  <main
+    class="pt-20 px-6 sm:px-12 lg:px-20 min-h-screen bg-gray-50 dark:bg-gray-900"
+  >
+    <div class="space-y-8">
+      <div class="flex justify-between items-center">
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100">
+          Dashboard
+        </h1>
+        <!-- Botón para abrir el modal -->
+        <button
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
+          onclick="document.getElementById('createProjectModal').showModal()"
+        >
+          Crear Proyecto
+        </button>
+
+        <!-- Modal -->
+        <dialog
+          id="createProjectModal"
+          class="modal backdrop:bg-gray-900 backdrop:bg-opacity-50 -top-1/2 w-1/2" 
+        >
+          <div
+            class="modal-box bg-white dark:bg-gray-800 p-7 rounded-lg shadow-lg"
+          >
+            <h2
+              class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4"
+            >
+              Crear Nuevo Proyecto
+            </h2>
+            <form method="POST" class="space-y-4">
+              <!-- Campo para el título -->
+              <div>
+                <label
+                  for="projectTitle"
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Título del Proyecto
+                </label>
+                <input
+                  type="text"
+                  id="projectTitle"
+                  name="projectTitle"
+                  placeholder="Escribe el título del proyecto"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  required
+                />
+              </div>
+
+              <!-- Campo para la descripción -->
+              <div>
+                <label
+                  for="projectDescription"
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Descripción del Proyecto
+                </label>
+                <textarea
+                  id="projectDescription"
+                  name="projectDescription"
+                  rows="4"
+                  placeholder="Escribe una descripción del proyecto"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  required></textarea>
+              </div>
+
+              <!-- Botones de acción -->
+              <div class="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onclick="document.getElementById('createProjectModal').close(); document.getElementById('projectTitle').value = ''; document.getElementById('projectDescription').value = '';"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Crear Proyecto
+                </button>
+              </div>
+            </form>
+          </div>
+        </dialog>
+      </div>
+      <p class="text-lg text-gray-700 dark:text-gray-300">
+        Bienvenido al panel de control.
+      </p>
+    </div>
+
+    <!-- Sección de proyectos -->
+    <ProjectContainer server:load />
+  </main>
+  
+</Layout>

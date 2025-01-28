@@ -33,8 +33,7 @@ if (Astro.request.method === "POST") {
       if (response?.code === 200) {
         // Guardar cookies y redirigir
         Astro.cookies.set("token", response.info.token, { httpOnly: true });
-        Astro.session.set("user", { name: response.info.user.last_name+" "+response.info.user.first_name, email: response.info.user.email, photo: response.info.user.user.photo, external_id: response.info.user.user.external_id });
-const user = Astro.session.get("user");
+        Astro.cookies.set("user", { name: response.info.user.last_name+" "+response.info.user.first_name, email: response.info.user.email, photo: response.info.user.user.photo, external_id: response.info.user.user.external_id });
         return Astro.redirect("/dashboard");
       } else {
         errors.email = "Correo o contraseña incorrectos.";
