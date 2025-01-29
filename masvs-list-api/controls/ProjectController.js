@@ -43,6 +43,15 @@ class ProjectController {
             res.status(400);
             res.json({ msg: 'Se requiere nombre y descripción', code: 400 });
         }
+        console.log(req.body.projectTitle.length);
+        if (req.body.projectTitle.length > 20) {
+            res.status(400);
+            res.json({ msg: 'El nombre del proyecto no puede exceder los 50 caracteres', code: 400 });
+        }
+        if (req.body.projectDescription.length > 100) {
+            res.status(400);
+            res.json({ msg: 'La descripción del proyecto no puede exceder los 100 caracteres', code: 400 });
+        }
 
         try {
             const entity = await models.entity.findOne({ where: { external_id: entity_external_id }, attributes: ['id'] });
