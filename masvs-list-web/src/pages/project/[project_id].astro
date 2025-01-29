@@ -1,0 +1,52 @@
+---
+export async function getStaticPaths() {
+  const conexion = useConexion();
+  const response = await conexion.get( `projects/${Astro.cookies.get("user").json().external_id}`);
+
+  if (!response || !response.info) {
+    console.error("No hay datos disponibles");
+    return [];
+  }
+console.log(response.info);
+  return response.info.map((project) => ({
+  params: { project_id: project.external_id }, // Cambiado a `project_id`
+  props: { name: project.name },
+}));
+
+
+}
+
+
+import Layout from "@layouts/Layout.astro";
+import useConexion from "@utiles/hooks/Conexion";
+
+const {project_id} = Astro.params;
+
+const conexion = useConexion();
+let projects = [];
+let loading = true;
+
+ const fetchProjects =  async () => {
+  try {
+    const response = await conexion.get(
+      `projects/${Astro.cookies.get("user").json().external_id}`
+    );
+    if (response?.code === 200) {
+      projects = response.info;
+    }
+  } catch (error) {
+    console.error("Error al obtener los proyectos:", error);
+  }  finally {
+  loading = false;
+}
+};
+
+await fetchProjects();
+
+---
+
+<Layout >
+ 
+ 
+
+</Layout>

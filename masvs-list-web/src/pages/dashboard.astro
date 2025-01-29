@@ -20,15 +20,27 @@ if (Astro.request.method === "POST") {
       errors.projectDescription += "La contraseña debe tener como maximo 100 caracteres. ";
     }
 
+    // Capturar las opciones de seguridad
+    const securityOptions = [
+      "Almacenamiento",
+      "Criptografia",
+      "Autenticacion",
+      "Red",
+      "Plataforma",
+      "Codigo",
+      "Resiliencia",
+    ].reduce((acc, key) => {
+      acc[key] = data.get(key) === "on";
+      return acc;
+    }, {});
+
     const hasErrors = Object.values(errors).some((msg) => msg);
 
     if (!hasErrors) {
-      const response = await conexion.post(`project/${Astro.cookies.get("user").json().external_id}`, { projectTitle, projectDescription });
+      const response = await conexion.post(`project/${Astro.cookies.get("user").json().external_id}`, { projectTitle, projectDescription, securityOptions });
 
       if (response?.code === 200) {
-        document.getElementById('projectTitle').setAttribute('value', ''); 
-        document.getElementById('projectDescription').setAttribute('value', ''); 
-        Astro.redirect("/dashboard");
+       return Astro.redirect("/project/" + response.info.external_id);
       } else {
         errors.projectTitle = "Nombre de proyecto ya existe.";
       }
@@ -107,6 +119,20 @@ if (Astro.request.method === "POST") {
                   required></textarea>
               </div>
 
+               <!-- Opciones de seguridad -->
+               <fieldset>
+                <legend class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Opciones de Seguridad</legend>
+                <div class="grid grid-cols-2 gap-2 text-gray-900 dark:text-gray-100">
+                  <label><input type="checkbox" name="Almacenamiento"> Almacenamiento</label>
+                  <label><input type="checkbox" name="Criptografia"> Criptografía</label>
+                  <label><input type="checkbox" name="Autenticacion"> Autenticación</label>
+                  <label><input type="checkbox" name="Red"> Red</label>
+                  <label><input type="checkbox" name="Plataforma"> Plataforma</label>
+                  <label><input type="checkbox" name="Codigo"> Código</label>
+                  <label><input type="checkbox" name="Resiliencia"> Resiliencia</label>
+                </div>
+              </fieldset>
+
               <!-- Botones de acción -->
               <div class="flex justify-end space-x-4">
                 <button
@@ -133,7 +159,7 @@ if (Astro.request.method === "POST") {
     </div>
 
     <!-- Sección de proyectos -->
-    <ProjectContainer server:load />
+    <ProjectContainer  />
   </main>
   
 </Layout>
