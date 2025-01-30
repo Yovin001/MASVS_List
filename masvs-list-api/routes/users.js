@@ -240,7 +240,7 @@ router.get('/projects/:entity_external_id', projectController.getProjects);
 router.get('/project/:entity_external_id/:project_external_id', projectController.getProject);
 router.get('/project/alone/:entity_external_id/:project_external_id', projectController.getAloneProject);
 router.post('/project/:entity_external_id', projectController.addProject);
-
+router.post('/project/update/:entity_external_id/:project_external_id', projectController.updateProject);
 
 /**PROJECT_QUESTION */
 

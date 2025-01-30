@@ -17,16 +17,6 @@ const links = [
     },
 ];
 
-if (Astro.request.method==="POST") {
-    try {
-        Astro.cookies.delete("token");
-    Astro.cookies.delete("user");
-    Astro.redirect("/dashboard");
-    Astro.redirect("/dashboard");
-    } catch (error) {
-        console.error("Error en el inicio de sesión:", error);
-    }
-} 
 
 ---
 
@@ -74,11 +64,7 @@ if (Astro.request.method==="POST") {
                             Perfil
                         </a>
                       
-                        <form method="POST">
-                        <button type="submit" class="w-full md:w-fit text-red-600 hover:text-red-800">
-                            Cerrar Sesión
-                        </button>
-                    </form>
+               
                         <a href="/login" class="w-full md:w-fit">
                             Get Started
                         </a>

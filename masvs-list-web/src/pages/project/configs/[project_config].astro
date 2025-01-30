@@ -13,12 +13,16 @@ export async function getStaticPaths() {
     params: { project_config: project.external_id }, // Cambiado a `project_id`
   }));
 }
+
+
 import AppHeaderProject from "@components/AppHeaderProject.astro";
 import Layout from "@layouts/Layout.astro";
 import useConexion from "@utiles/hooks/Conexion";
+const errors = { projectTitle: "", projectDescription: "" };
 const { project_config } = Astro.params;
 const conexion = useConexion();
 let project;
+let typeQuestions = [];
 
 const fetchProjects = async () => {
   try {
@@ -26,13 +30,68 @@ const fetchProjects = async () => {
       `project/alone/${Astro.cookies.get("user").json().external_id}/${project_config}`,
     );
     if (response?.code === 200) {
-      project = response.info;
+      project = response.info.project;
+      typeQuestions = response.info.typeQuestions;
     }
   } catch (error) {
     console.error("Error al obtener los proyectos:", error);
   } 
 };
 await fetchProjects();
+
+const getType = (typeQuestionsID) => {
+  const type = typeQuestions.find((q) => q.name === typeQuestionsID);
+  return type ? true : false;
+};
+
+
+if (Astro.request.method === "POST") {
+  try {
+    const data = await Astro.request.formData();
+    const projectTitle = data.get("projectTitle");
+    const projectDescription = data.get("projectDescription");
+
+    // Validaciones simples
+    if (typeof projectTitle !== "string" || projectTitle.length > 20 || projectTitle.length < 3) {
+      errors.projectTitle += "EL nombre del proyecto debe tener como minimo 3 caracteres y como maximo 20. ";
+    }
+    if (typeof projectDescription !== "string" || projectDescription.length > 100 || projectDescription.length < 6) {
+      errors.projectDescription += "La descripción del proyecto debe tener como minimo 6 caracteres y como maximo 100. ";
+    }
+
+    // Capturar las opciones de seguridad
+    const securityOptions = [
+      "Almacenamiento",
+      "Criptografia",
+      "Autenticacion",
+      "Red",
+      "Plataforma",
+      "Codigo",
+      "Resiliencia",
+    ].reduce((acc, key) => {
+      acc[key] = data.get(key) === "on";
+      return acc;
+    }, {});
+
+    const hasErrors = Object.values(errors).some((msg) => msg);
+
+    if (!hasErrors) {
+      const response = await conexion.post(`project/update/${Astro.cookies.get("user").json().external_id}/${project.external_id}`, { projectTitle, projectDescription, securityOptions }, Astro.cookies.get("token").toString());
+
+      if (response?.code === 200) {
+
+       return Astro.redirect("/project/" + response.info.external_id);
+      } else {
+        errors.projectTitle = "Problema en el título del proyecto.";
+        errors.projectDescription = "Problema en la descripción del proyecto.";
+      }
+    }
+  } catch (error) {
+    errors.projectTitle = "Ocurrió un error inesperado. Inténtalo nuevamente.";
+    errors.projectDescription = "Ocurrió un error inesperado. Inténtalo nuevamente.";
+  }
+}
+
 
 
 ---
@@ -41,6 +100,90 @@ await fetchProjects();
       <div class="flex flex-col items-center justify-center">
         <AppHeaderProject project_id= {project.external_id} />
       </div>
-    
+      <section class="fixed inset-0 flex top-40 justify-center backdrop:bg-gray-900 backdrop:bg-opacity-50">
+      <div
+          class=" backdrop:bg-gray-900 backdrop:bg-opacity-50 -top-1/3 w-1/2" 
+        >
+          <div
+            class=" bg-white dark:bg-gray-800 p-7 rounded-lg shadow-lg"
+          >
+            <h2
+              class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4"
+            >
+              Actualizar Proyecto
+            </h2>
+            <form method="POST" class="space-y-4">
+              <!-- Campo para el título -->
+              <div>
+                <label
+                  for="projectTitle"
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Título del Proyecto
+                </label>
+                <input
+                  type="text"
+                  id="projectTitle"
+                  name="projectTitle"
+                  value={project.name}
+                  placeholder="Escribe el título del proyecto"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  required
+                />   {errors.projectTitle && <p class="text-red-500 text-sm">{errors.projectTitle}</p>}
+              </div>
+
+              <!-- Campo para la descripción -->
+              <div>
+                <label
+                  for="projectDescription"
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Descripción del Proyecto
+                </label>
+                <textarea
+                id="projectDescription"
+                name="projectDescription"
+                rows="4"
+                placeholder="Escribe una descripción del proyecto"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                required
+              >{project.description}</textarea>
+              {errors.projectDescription && <p class="text-red-500 text-sm">{errors.projectDescription}</p>}
+              </div>
+
+               <!-- Opciones de seguridad -->
+               <fieldset>
+                <legend class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Opciones de Seguridad</legend>
+                <div class="grid grid-cols-2 gap-2 text-gray-900 dark:text-gray-100">
+                  <label><input type="checkbox"  checked={getType('Almacenamiento')}  name="Almacenamiento"> Almacenamiento</label>
+                  <label><input type="checkbox" checked={getType('Criptografía')} name="Criptografia"> Criptografía</label>
+                  <label><input type="checkbox" checked={getType('Autenticación')}  name="Autenticacion"> Autenticación</label>
+                  <label><input type="checkbox" checked={getType('Red')}  name="Red"> Red</label>
+                  <label><input type="checkbox"  checked={getType('Plataforma')} name="Plataforma"> Plataforma</label>
+                  <label><input type="checkbox" checked={getType('Código')} name="Codigo"> Código</label>
+                  <label><input type="checkbox" checked={getType('Resiliencia')} name="Resiliencia"> Resiliencia</label>
+                </div>
+              </fieldset>
+
+              <!-- Botones de acción -->
+              <div class="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onclick="document.getElementById('createProjectModal').close(); document.getElementById('projectTitle').value = ''; document.getElementById('projectDescription').value = '';"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Actualizar Proyecto
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        </section>
     </main>
   </Layout>

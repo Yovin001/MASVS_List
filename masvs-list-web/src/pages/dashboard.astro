@@ -38,7 +38,7 @@ if (Astro.request.method === "POST") {
       acc[key] = data.get(key) === "on";
       return acc;
     }, {});
-
+console.log( securityOptions);
     const hasErrors = Object.values(errors).some((msg) => msg);
 
     if (!hasErrors) {
@@ -52,7 +52,6 @@ if (Astro.request.method === "POST") {
       }
     }
   } catch (error) {
-    console.error("Error en el inicio de sesión:", error);
     errors.projectTitle = "Ocurrió un error inesperado. Inténtalo nuevamente.";
     errors.projectDescription = "Ocurrió un error inesperado. Inténtalo nuevamente.";
   }

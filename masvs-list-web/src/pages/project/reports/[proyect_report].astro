@@ -28,7 +28,7 @@ const fetchProjects = async () => {
       `project/alone/${Astro.cookies.get("user").json().external_id}/${proyect_report}`,
     );
     if (response?.code === 200) {
-      project = response.info;
+      project = response.info.project;
     }
   } catch (error) {
     console.error("Error al obtener los proyectos:", error);

@@ -16,7 +16,7 @@ let loading = true;
 const fetchProjects = async () => {
   try {
     const response = await conexion.get(Astro.cookies.get("token").toString(),
-      `project/${Astro.cookies.get("user").json().external_id}/${project_id}`,
+      `project/${Astro.cookies.get("user").json().external_id}/${project_id}`
     );
     if (response?.code === 200) {
       project = response.info.project;
@@ -36,6 +36,10 @@ if (Astro.request.method === "POST") {
   try {
     const data = await Astro.request.formData();
     // Actualizar el estado de las preguntas en el array `questions`
+    questions = questions.map((question) => {
+      const newState = data.get(question.question_id.toString()) === "on";
+      return { ...question, state: newState };
+    });
     // Enviar el array `questions` actualizado al servidor
     const response = await conexion.post(
       `project/questions/${Astro.cookies.get("user").json().external_id}/${project.external_id}`,
@@ -54,7 +58,7 @@ if (Astro.request.method === "POST") {
 const hasType = (typeName) => {
   return Array.isArray(types) && types.some((type) => type.name === typeName);
 };
-// Función para obtener el estado de una pregunta por su ID
+
 const getQuestionState = (questionId) => {
   const question = questions.find((q) => q.question_id === questionId);
   return question ? question.state : false;
