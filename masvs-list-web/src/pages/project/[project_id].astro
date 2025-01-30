@@ -2,7 +2,7 @@
 export async function getStaticPaths() {
   const conexion = useConexion();
   const response = await conexion.get(Astro.cookies.get("token").toString(),
-    `projects/${Astro.cookies.get("user").json().external_id}`,
+    `projects/${Astro.cookies.get("user").json().external_id}`
   );
 
   if (!response || !response.info) {
@@ -42,7 +42,7 @@ await fetchProjects();
       <AppHeaderProject project_id={project.external_id} />
     </div>
     <div class="space-y-12">
-      <QuestionContainer project_id={project.external_id} />
+      <QuestionContainer  project_id={project.external_id}  />
     </div>
   </main>
 </Layout>

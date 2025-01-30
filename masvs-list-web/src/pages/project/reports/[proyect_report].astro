@@ -13,9 +13,11 @@ export async function getStaticPaths() {
     params: { proyect_report: project.external_id }, // Cambiado a `project_id`
   }));
 }
+
 import AppHeaderProject from "@components/AppHeaderProject.astro";
 import Layout from "@layouts/Layout.astro";
 import useConexion from "@utiles/hooks/Conexion";
+
 const { proyect_report } = Astro.params;
 const conexion = useConexion();
 let project;
@@ -33,14 +35,22 @@ const fetchProjects = async () => {
   } 
 };
 await fetchProjects();
-
-
 ---
-<Layout title=`${project.name}- Reports` >
-    <main class="pt-20 px-6 sm:px-12 lg:px-20 min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div class="flex flex-col items-center justify-center">
-        <AppHeaderProject project_id= {project.external_id} />
-      </div>
+
+<Layout title={`${project.name}- Reports`}>
+  <main class="pt-20 px-6 sm:px-12 lg:px-20 min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="flex flex-col items-center justify-center">
+      <AppHeaderProject project_id={project.external_id} />
+    </div>
+    <div>
+      <!-- Contenedor para el gráfico -->
+      <div id="chart" style="width: 100%; height: 400px;"></div>
+    </div>
+  </main>
+
+  <!-- Script en el cliente para inicializar el gráfico -->
+  <script>
     
-    </main>
-  </Layout>
+    </script>
+    
+</Layout>

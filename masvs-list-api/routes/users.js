@@ -21,6 +21,8 @@ const ProjectController = require('../controls/ProjectController');
 var projectController = new ProjectController();
 const ProjectQuestionController = require('../controls/ProjectQuestionController');
 var projectQuestionController = new ProjectQuestionController();
+const QuestionController = require('../controls/QuestionController');
+var questionController = new QuestionController();
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -243,5 +245,10 @@ router.post('/project/:entity_external_id', projectController.addProject);
 /**PROJECT_QUESTION */
 
 router.post('/project/questions/:entity_external_id/:project_external_id', projectQuestionController.updateState);
+
+/**QUESTION */
+router.get('/question/report/:entity_external_id/:project_external_id', questionController.getReport);
+
+
 
 module.exports = router;  

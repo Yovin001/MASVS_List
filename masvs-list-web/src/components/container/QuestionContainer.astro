@@ -1,5 +1,6 @@
 ---
 import useConexion from "@utiles/hooks/Conexion";
+import { console } from "inspector";
 
 export interface Props {
 	project_id?: string;
@@ -31,23 +32,15 @@ const fetchProjects = async () => {
 
 await fetchProjects();
 
-if (Astro.request.method === "POST") {
+if (Astro.request.method === "POST") {    
   try {
     const data = await Astro.request.formData();
-
     // Actualizar el estado de las preguntas en el array `questions`
-    questions = questions.map((question) => {
-      const newState = data.get(question.question_id.toString()) === "on";
-      return { ...question, state: newState };
-    });
-
-    console.log(questions);
     // Enviar el array `questions` actualizado al servidor
     const response = await conexion.post(
       `project/questions/${Astro.cookies.get("user").json().external_id}/${project.external_id}`,
       { questions },
-      Astro.cookies.get("token").toString(),
-    );
+      Astro.cookies.get("token").toString()    );
 
     if (response?.code === 200) {
         return Astro.redirect("/project/" + project.external_id);
