@@ -10,22 +10,20 @@ export async function getStaticPaths() {
     return [];
   }
   return response.info.map((project) => ({
-    params: { project_id: project.external_id }, // Cambiado a `project_id`
+    params: { proyect_report: project.external_id }, // Cambiado a `project_id`
   }));
 }
+import AppHeaderProject from "@components/AppHeaderProject.astro";
 import Layout from "@layouts/Layout.astro";
 import useConexion from "@utiles/hooks/Conexion";
-import QuestionContainer from "@components/container/QuestionContainer.astro";
-import AppHeaderProject from "@components/AppHeaderProject.astro";
-
-const { project_id } = Astro.params;
+const { proyect_report } = Astro.params;
 const conexion = useConexion();
 let project;
 
 const fetchProjects = async () => {
   try {
     const response = await conexion.get(Astro.cookies.get("token").toString(),
-      `project/alone/${Astro.cookies.get("user").json().external_id}/${project_id}`,
+      `project/alone/${Astro.cookies.get("user").json().external_id}/${proyect_report}`,
     );
     if (response?.code === 200) {
       project = response.info;
@@ -35,14 +33,14 @@ const fetchProjects = async () => {
   } 
 };
 await fetchProjects();
+
+
 ---
-<Layout title={project.name}>
-  <main class="pt-20 px-6 sm:px-12 lg:px-20 min-h-screen bg-gray-50 dark:bg-gray-900">
-    <div class="flex flex-col items-center justify-center">
-      <AppHeaderProject project_id={project.external_id} />
-    </div>
-    <div class="space-y-12">
-      <QuestionContainer project_id={project.external_id} />
-    </div>
-  </main>
-</Layout>
+<Layout title=`${project.name}- Reports` >
+    <main class="pt-20 px-6 sm:px-12 lg:px-20 min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div class="flex flex-col items-center justify-center">
+        <AppHeaderProject project_id= {project.external_id} />
+      </div>
+    
+    </main>
+  </Layout>

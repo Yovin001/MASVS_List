@@ -7,7 +7,7 @@ let loading = true;
 
 const fetchProjects = async () => {
   try {
-    const response = await conexion.get(
+    const response = await conexion.get(Astro.cookies.get("token").toString(),
       `projects/${Astro.cookies.get("user").json().external_id}`,
     );
     if (response?.code === 200) {

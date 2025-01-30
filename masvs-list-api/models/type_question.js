@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
         state: { type: DataTypes.BOOLEAN, defaultValue: true },
         name: { type: DataTypes.STRING(20), defaultValue: "NO_DATA" },
     }, {
-        freezeTableName: true
+        freezeTableName: true, timestamps: false 
     });
     type_question.associate = function (models) {
         type_question.hasMany(models.question, { foreignKey: 'type_question_id', as: 'question' });

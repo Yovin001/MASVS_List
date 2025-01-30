@@ -1,0 +1,43 @@
+---
+import Container from "./Container.astro";
+
+export interface Props {
+    project_id: string;
+}
+const { project_id } = Astro.props;
+
+const links = [
+    {
+        to: `/project/${project_id}`,
+        label: "Preguntas",
+    },
+    {
+        to: `/project/reports/${project_id}`,
+        label: "Reportes",
+    },
+    {
+        to: `/project/configs/${project_id}`,
+        label: "Configuraciones",
+    },
+];
+
+---
+<nav class="w-full shadow-sm mt-4">
+    <Container>
+        <div class="flex flex-col items-center justify-center gap-4 py-4">
+                <div class="text-gray-600 dark:text-gray-300">
+                    <ul class="flex gap-6 tracking-wide text-sm">
+                        {links.map((link) => (
+                            <li>
+                                <a
+                                    href={link.to}
+                                    class="px-2 py-1 hover:bg-gray-950/5 hover:text-gray-950 rounded-[--btn-border-radius] block transition dark:hover:text-white md:px-4 dark:hover:bg-white/5">
+                                    <span>{link.label}</span>
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+        </div>
+    </Container>
+</nav>

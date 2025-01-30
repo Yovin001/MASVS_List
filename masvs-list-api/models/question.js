@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
     const question = sequelize.define('question', {
         state: { type: DataTypes.BOOLEAN, defaultValue: true }
     }, {
-        freezeTableName: true
+        freezeTableName: true, timestamps: false 
     });
     question.associate = function (models) {
         question.hasMany(models.project_question, { foreignKey: 'question_id', as: 'project_question' });

@@ -1,0 +1,401 @@
+---
+import useConexion from "@utiles/hooks/Conexion";
+
+export interface Props {
+	project_id?: string;
+}
+const { project_id } = Astro.props;
+
+const conexion = useConexion();
+let project;
+let questions = [];
+let types = []; // Cambiado a `types` para evitar confusión con `type`
+let loading = true;
+
+const fetchProjects = async () => {
+  try {
+    const response = await conexion.get(Astro.cookies.get("token").toString(),
+      `project/${Astro.cookies.get("user").json().external_id}/${project_id}`,
+    );
+    if (response?.code === 200) {
+      project = response.info.project;
+      questions = response.info.projectQuestions;
+      types = response.info.typeQuestions; // Cambiado a `types`
+    }
+  } catch (error) {
+    console.error("Error al obtener los proyectos:", error);
+  } finally {
+    loading = false;
+  }
+};
+
+await fetchProjects();
+
+if (Astro.request.method === "POST") {
+  try {
+    const data = await Astro.request.formData();
+
+    // Actualizar el estado de las preguntas en el array `questions`
+    questions = questions.map((question) => {
+      const newState = data.get(question.question_id.toString()) === "on";
+      return { ...question, state: newState };
+    });
+
+    console.log(questions);
+    // Enviar el array `questions` actualizado al servidor
+    const response = await conexion.post(
+      `project/questions/${Astro.cookies.get("user").json().external_id}/${project.external_id}`,
+      { questions },
+      Astro.cookies.get("token").toString(),
+    );
+
+    if (response?.code === 200) {
+        return Astro.redirect("/project/" + project.external_id);
+    }
+  } catch (error) {
+    console.error("Error al actualizar el estado de la pregunta:", error);
+  }
+}
+
+// Función para verificar si un tipo específico está presente en el array `types`
+const hasType = (typeName) => {
+  return Array.isArray(types) && types.some((type) => type.name === typeName);
+};
+// Función para obtener el estado de una pregunta por su ID
+const getQuestionState = (questionId) => {
+  const question = questions.find((q) => q.question_id === questionId);
+  return question ? question.state : false;
+};
+
+---
+
+
+<form method="POST" class="space-y-4">
+
+    <div class="flex justify-end space-x-4">
+                    <button
+                      type="submit"
+                      class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      Guardar
+                    </button>
+                  </div>
+
+{hasType('Almacenamiento') && (
+
+<section class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-2">
+
+   <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Almacenamiento</h1>
+     <div class="mb-8"> <!-- Espacio entre subtítulos -->
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+             La aplicación almacena de forma segura los datos sensibles
+         </h2>
+         <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(1)}  name="1"/><span class="text-lg"> ¿La aplicación prueba el almacenamiento local para
+                 datos sensibles?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(2)} name="2" /><span class="text-lg"> ¿La aplicación prueba la política de seguridad de
+                 acceso al dispositivo?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(3)} name="3" /><span class="text-lg"> ¿La aplicación prueba el almacenamiento local de
+                 datos?</span> </label>
+         </div>
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación previene la
+             fuga de datos sensibles</h2> <!-- Subtítulo -->
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(4)} name="4" /><span class="text-lg"> ¿La aplicación determina si los datos sensibles se
+                 comparten con terceros a través de servicios integrados?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(5)} name="5" /><span class="text-lg"> ¿La aplicación determina si los datos sensibles se
+                 comparten con terceros a través de notificaciones?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(6)} name="6" /><span class="text-lg"> ¿La aplicación prueba las copias de seguridad de datos
+                 sensibles?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(7)} name="7" /><span class="text-lg"> ¿La aplicación prueba la memoria en busca de datos
+                 sensibles?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(8)} name="8" /><span class="text-lg"> ¿La aplicación prueba los registros en busca de datos
+                 sensibles?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(9)} name="9" /><span class="text-lg"> ¿La aplicación verifica los registros en busca de
+                 datos sensibles?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(10)} name="10" /><span class="text-lg"> ¿La aplicación prueba la memoria en busca de datos
+                 sensibles?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(11)} name="11" /><span class="text-lg"> ¿La aplicación prueba las copias de seguridad de
+                 datos sensibles?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(12)} name="12" /><span class="text-lg"> ¿La aplicación busca datos sensibles en la caché del
+                 teclado?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(13)} name="13" /><span class="text-lg"> ¿La aplicación determina si los datos sensibles se
+                 comparten con terceros?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(14)} name="14" /><span class="text-lg"> ¿La aplicación determina si la caché del teclado está
+                 deshabilitada para campos de entrada de texto?</span> </label>
+         </div>
+     </div>
+ </section>
+ )}
+
+ {hasType('Criptografía') && (
+
+  <section class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-2">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Criptografía</h1>
+     <div class="mb-8">
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación emplea
+             criptografía fuerte actual y la utiliza según las mejores prácticas de la industria.</h2>
+         <!-- Subtítulo -->
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(15)} name="15" /><span class="text-lg"> ¿La aplicación prueba la criptografía
+                 simétrica?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(16)} name="16" /><span class="text-lg"> ¿La aplicación prueba la configuración de los
+                 algoritmos criptográficos estándar?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(17)} name="17" /><span class="text-lg"> ¿La aplicación prueba la generación de números
+                 aleatorios?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(18)} name="18" /><span class="text-lg"> ¿La aplicación verifica la configuración de los
+                 algoritmos criptográficos estándar?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(19)} name="19" /><span class="text-lg"> ¿La aplicación prueba la generación de números
+                 aleatorios?</span> </label>
+         </div>
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación realiza
+                 la gestión de claves según las mejores prácticas de la industria.</h2> <!-- Subtítulo -->
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(20)} name="20" /><span class="text-lg"> ¿La aplicación prueba los propósitos de las
+                 claves?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(21)} name="21" /><span class="text-lg"> ¿La aplicación prueba la gestión de claves?</span> </label>
+         </div>
+     </div>
+ </section>
+ )}
+
+ {hasType('Autenticación') && (
+
+  <section class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-2">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Autenticación</h1>
+     <!-- Título principal -->
+     <div class="mb-8">
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación realiza
+             autenticación local de forma segura según las mejores prácticas de la plataforma.</h2>
+         <!-- Subtítulo -->
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(22)} name="22" /><span class="text-lg"> ¿La aplicación prueba la autenticación
+                 biométrica?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(23)} name="23" /><span class="text-lg"> ¿La aplicación prueba la confirmación de
+                 credenciales?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(24)} name="24" /><span class="text-lg"> ¿La aplicación prueba la autenticación local?</span> </label>
+         </div>
+     </div>
+ </section>
+ )}
+
+ {hasType('Red') && (
+
+  <section class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-2">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Red</h1>
+     <div class="mb-8">
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación asegura todo
+             el tráfico de red según las mejores prácticas actuales.</h2> <!-- Subtítulo -->
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(25)} name="25" /><span class="text-lg"> ¿La aplicación prueba la verificación de identidad de
+                 los endpoints?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(26)} name="26" /><span class="text-lg"> ¿La aplicación prueba el proveedor de
+                 seguridad?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(27)} name="27" /><span class="text-lg"> ¿La aplicación prueba el cifrado de datos en la
+                 red?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(28)} name="28" /><span class="text-lg"> ¿La aplicación prueba la configuración de
+                 TLS?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(29)} name="29" /><span class="text-lg"> ¿La aplicación prueba la configuración de
+                 TLS?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(30)} name="30" /><span class="text-lg"> ¿La aplicación prueba la verificación de identidad de
+                 los endpoints?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(31)} name="31" /><span class="text-lg"> ¿La aplicación prueba el cifrado de datos en la
+                 red?</span> </label>
+         </div>
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación realiza el
+             anclaje de identidad para todos los endpoints remotos bajo el control del desarrollador.</h2>
+         <!-- Subtítulo -->
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(32)} name="32" /><span class="text-lg"> ¿La aplicación prueba los almacenes de certificados
+                 personalizados y el anclaje de certificados?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(33)} name="33" /><span class="text-lg"> ¿La aplicación prueba los almacenes de certificados
+                 personalizados y el anclaje de certificados?</span> </label>
+         </div>
+     </div>
+ </section>
+
+ )}
+
+ {hasType('Plataforma') && (
+
+  <section class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-2">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Plataforma</h1>
+     <div class="mb-8">
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación utiliza los
+             mecanismos IPC de forma segura.</h2> <!-- Subtítulo -->
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(34)} name="34" /><span class="text-lg"> ¿La aplicación prueba los permisos de las
+                 aplicaciones?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(35)} name="35" /><span class="text-lg"> ¿La aplicación prueba la implementación vulnerable de
+                 PendingIntent?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(36)} name="36" /><span class="text-lg"> ¿La aplicación prueba la exposición de
+                 funcionalidades sensibles a través de IPC?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(37)} name="37" /><span class="text-lg"> ¿La aplicación determina si los datos almacenados
+                 sensibles han sido expuestos a través de mecanismos IPC?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(38)} name="38" /><span class="text-lg"> ¿La aplicación prueba los enlaces profundos (Deep
+                 Links)?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(39)} name="39" /><span class="text-lg"> ¿La aplicación prueba las extensiones de
+                 aplicaciones?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(40)} name="40" /><span class="text-lg"> ¿La aplicación prueba los esquemas de URL
+                 personalizados?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(41)} name="41" /><span class="text-lg"> ¿La aplicación prueba los permisos de las
+                 aplicaciones?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(42)} name="42" /><span class="text-lg"> ¿La aplicación determina si los datos sensibles están
+                 expuestos a través de mecanismos IPC?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(43)} name="43" /><span class="text-lg"> ¿La aplicación prueba UIPasteboard?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(44)} name="44" /><span class="text-lg"> ¿La aplicación prueba la exposición de
+                 funcionalidades sensibles a través de IPC?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(45)} name="45" /><span class="text-lg"> ¿La aplicación prueba el uso compartido de
+                 UIActivity?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(46)} name="46" /><span class="text-lg"> ¿La aplicación prueba los enlaces
+                 universales?</span> </label>
+         </div>
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación utiliza
+             WebViews de forma segura.</h2> <!-- Subtítulo -->
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(47)} name="47" /><span class="text-lg"> ¿La aplicación prueba los manejadores de protocolo de
+                 WebView?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(48)} name="48" /><span class="text-lg"> ¿La aplicación prueba la limpieza de
+                 WebViews?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(49)} name="49" /><span class="text-lg"> ¿La aplicación prueba la ejecución de JavaScript en
+                 WebViews?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(50)} name="50" /><span class="text-lg"> ¿La aplicación prueba los objetos Java expuestos a
+                 través de WebViews?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(51)} name="51" /><span class="text-lg"> ¿La aplicación prueba los manejadores de protocolo de
+                 WebView?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(52)} name="52" /><span class="text-lg"> ¿La aplicación prueba WebViews en iOS?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(53)} name="53" /><span class="text-lg"> ¿La aplicación determina si los métodos nativos están
+                 expuestos a través de WebViews?</span> </label>
+         </div>
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación utiliza la
+             interfaz de usuario de forma segura.</h2> <!-- Subtítulo -->
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(54)} name="54" /><span class="text-lg"> ¿La aplicación prueba ataques de superposición
+                 (Overlay Attacks)?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(55)} name="55" /><span class="text-lg"> ¿La aplicación verifica la divulgación de datos
+                 sensibles a través de la interfaz de usuario?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(56)} name="56" /><span class="text-lg"> ¿La aplicación detecta información sensible en
+                 capturas de pantalla generadas automáticamente?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(57)} name="57" /><span class="text-lg"> ¿La aplicación verifica la divulgación de datos
+                 sensibles a través de la interfaz de usuario?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(58)} name="58" /><span class="text-lg"> ¿La aplicación prueba capturas de pantalla generadas
+                 automáticamente en busca de información sensible?</span> </label>
+         </div>
+     </div>
+ </section>
+
+ )}
+
+ {hasType('Código') && (
+  <section class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-2">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Código</h1>
+     <div class="mb-8">
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación tiene un
+             mecanismo para hacer cumplir las actualizaciones.</h2> <!-- Subtítulo -->
+
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(59)} name="59" /><span class="text-lg"> ¿La aplicación prueba la actualización
+                 forzada?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(60)} name="60" /><span class="text-lg"> ¿La aplicación prueba la actualización
+                 forzada?</span> </label>
+         </div>
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación solo usa
+             componentes de software sin vulnerabilidades conocidas.</h2> <!-- Subtítulo -->
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(61)} name="61" /><span class="text-lg"> ¿La aplicación verifica debilidades en bibliotecas de
+                 terceros?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(62)} name="62" /><span class="text-lg"> ¿La aplicación verifica debilidades en bibliotecas de
+                 terceros?</span> </label>
+         </div>
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación valida y
+             sanea todas las entradas no confiables.</h2> <!-- Subtítulo -->
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(63)} name="63" /><span class="text-lg"> ¿La aplicación asegura que las funciones de seguridad
+                 gratuitas estén activadas?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(64)} name="64" /><span class="text-lg"> ¿La aplicación prueba fallas de inyección?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(65)} name="65" /><span class="text-lg"> ¿La aplicación prueba el almacenamiento local para la
+                 validación de entrada?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(66)} name="66" /><span class="text-lg"> ¿La aplicación prueba errores de corrupción de
+                 memoria?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(67)} name="67" /><span class="text-lg"> ¿La aplicación prueba la persistencia de
+                 objetos?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(68)} name="68" /><span class="text-lg"> ¿La aplicación prueba los intents implícitos?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(69)} name="69" /><span class="text-lg"> ¿La aplicación prueba la carga de URL en
+                 WebViews?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(70)} name="70" /><span class="text-lg"> ¿La aplicación prueba la persistencia de
+                 objetos?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(71)} name="71" /><span class="text-lg"> ¿La aplicación prueba errores de corrupción de
+                 memoria?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(72)} name="72" /><span class="text-lg"> ¿La aplicación asegura que las funciones de seguridad
+                 gratuitas estén activadas?</span> </label>
+         </div>
+     </div>
+ </section>
+
+ )}
+
+ {hasType('Resiliencia') && (
+
+  <section class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-2">
+     <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Resiliencia</h1>
+     <div class="mb-8">
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación valida la
+             integridad de la plataforma.</h2>
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(73)} name="73" /><span class="text-lg"> ¿La aplicación prueba la detección de root?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(74)} name="74" /><span class="text-lg"> ¿La aplicación prueba la detección de
+                 emuladores?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(75)} name="75" /><span class="text-lg"> ¿La aplicación prueba la detección de
+                 jailbreak?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(76)} name="76" /><span class="text-lg"> ¿La aplicación prueba la detección de
+                 emuladores?</span> </label>
+         </div>
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación implementa
+             mecanismos anti-manipulación.</h2>
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(77)} name="77" /><span class="text-lg"> ¿La aplicación prueba la verificación de integridad
+                 de archivos?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(78)} name="78" /><span class="text-lg"> ¿La aplicación prueba la verificación de integridad
+                 en tiempo de ejecución?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(79)} name="79" /><span class="text-lg"> ¿La aplicación verifica que esté firmada
+                 correctamente?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(80)} name="80" /><span class="text-lg"> ¿La aplicación prueba la verificación de integridad
+                 de archivos?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(81)} name="81" /><span class="text-lg"> ¿La aplicación verifica que esté firmada
+                 correctamente?</span> </label>
+         </div>
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación implementa
+             mecanismos anti-análisis estático.</h2>
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(82)} name="82" /><span class="text-lg"> ¿La aplicación prueba la presencia de símbolos de
+                 depuración?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(83)} name="83" /><span class="text-lg"> ¿La aplicación prueba la presencia de código de
+                 depuración y logs de error detallados?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(84)} name="84" /><span class="text-lg"> ¿La aplicación prueba la ofuscación?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(85)} name="85" /><span class="text-lg"> ¿La aplicación prueba la presencia de código de
+                 depuración y logs de error detallados?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(86)} name="86" /><span class="text-lg"> ¿La aplicación prueba la ofuscación?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(87)} name="87" /><span class="text-lg"> ¿La aplicación prueba la presencia de símbolos de
+                 depuración?</span> </label>
+         </div>
+         <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">La aplicación implementa
+             técnicas anti-análisis dinámico.</h2>
+           <div class="grid gap-4 text-gray-900 dark:text-gray-100 pl-2 mb-4">
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(88)} name="88" /><span class="text-lg"> ¿La aplicación prueba si es depurable?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(89)} name="89" /><span class="text-lg"> ¿La aplicación prueba la detección de herramientas de
+                 ingeniería inversa?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(90)} name="90" /><span class="text-lg"> ¿La aplicación prueba la detección de
+                 depuración?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(91)} name="91" /><span class="text-lg"> ¿La aplicación prueba la detección de
+                 depuración?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(92)} name="92" /><span class="text-lg"> ¿La aplicación prueba si es depurable?</span> </label>
+             <label class="flex items-center gap-3 cursor-pointer"><input class="w-5 h-5 accent-blue-500 rounded-md" type="checkbox" checked={getQuestionState(93)} name="93" /><span class="text-lg"> ¿La aplicación prueba la detección de herramientas de
+                 ingeniería inversa?</span> </label>
+         </div>
+     </div>
+ </section>
+ )}
+</form>
+

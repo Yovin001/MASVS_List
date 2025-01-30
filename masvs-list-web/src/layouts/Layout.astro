@@ -1,12 +1,17 @@
 ---
 import BaseHead from "../components/BaseHead.astro";
 import AppHeader from "../components/AppHeader.astro";
+
+interface Props {
+    title: string;
+}
+const { title } = Astro.props? Astro.props : { title: "MASVS List" };
 ---
 
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
     <head>
-       <BaseHead />
+       <BaseHead  title={title}/>
     </head>
     <body class="overflow-x-hidden bg-white dark:bg-gray-950">
         <AppHeader />

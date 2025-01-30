@@ -5,6 +5,11 @@ import ProjectContainer from "@components/container/ProjectContainer.astro";
 
 const conexion = useConexion();
 const errors = { projectTitle: "", projectDescription: "" };
+const token = Astro.cookies.get("token");
+const user = Astro.cookies.get("user");
+if (!token || !user) {
+  return Astro.redirect("/login");
+}
 
 if (Astro.request.method === "POST") {
   try {
@@ -37,9 +42,10 @@ if (Astro.request.method === "POST") {
     const hasErrors = Object.values(errors).some((msg) => msg);
 
     if (!hasErrors) {
-      const response = await conexion.post(`project/${Astro.cookies.get("user").json().external_id}`, { projectTitle, projectDescription, securityOptions });
+      const response = await conexion.post(`project/${Astro.cookies.get("user").json().external_id}`, { projectTitle, projectDescription, securityOptions }, Astro.cookies.get("token").toString());
 
       if (response?.code === 200) {
+
        return Astro.redirect("/project/" + response.info.external_id);
       } else {
         errors.projectTitle = "Nombre de proyecto ya existe.";
@@ -73,7 +79,7 @@ if (Astro.request.method === "POST") {
         <!-- Modal -->
         <dialog
           id="createProjectModal"
-          class="modal backdrop:bg-gray-900 backdrop:bg-opacity-50 -top-1/2 w-1/2" 
+          class="modal backdrop:bg-gray-900 backdrop:bg-opacity-50 -top-1/3 w-1/2" 
         >
           <div
             class="modal-box bg-white dark:bg-gray-800 p-7 rounded-lg shadow-lg"
@@ -160,6 +166,7 @@ if (Astro.request.method === "POST") {
 
     <!-- Sección de proyectos -->
     <ProjectContainer  />
+
   </main>
   
 </Layout>

@@ -19,6 +19,8 @@ const RequestController = require('../controls/RequestController');
 var peticionController = new RequestController();
 const ProjectController = require('../controls/ProjectController');
 var projectController = new ProjectController();
+const ProjectQuestionController = require('../controls/ProjectQuestionController');
+var projectQuestionController = new ProjectQuestionController();
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -233,6 +235,13 @@ router.get('/aceptarechazar/peticiones/:external/:state/:rejection_reason/:appro
 /**PROJECTS */
 
 router.get('/projects/:entity_external_id', projectController.getProjects);
+router.get('/project/:entity_external_id/:project_external_id', projectController.getProject);
+router.get('/project/alone/:entity_external_id/:project_external_id', projectController.getAloneProject);
 router.post('/project/:entity_external_id', projectController.addProject);
+
+
+/**PROJECT_QUESTION */
+
+router.post('/project/questions/:entity_external_id/:project_external_id', projectQuestionController.updateState);
 
 module.exports = router;  

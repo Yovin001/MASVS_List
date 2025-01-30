@@ -1,13 +1,13 @@
 ---
 import Layout from "../layouts/LayoutLogin.astro";
 import useConexion from "../utiles/hooks/Conexion";
-
 const conexion = useConexion();
 const errors = { email: "", password: "" };
 
 // Verificar si el usuario ya está autenticado
 const token = Astro.cookies.get("token");
-if (token) {
+const user = Astro.cookies.get("user");
+if (token && user) {
   return Astro.redirect("/dashboard");
 }
 
