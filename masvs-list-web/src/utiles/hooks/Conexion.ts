@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const urlBase = 'http://localhost:3000/api/';
+export const BASE_URL = 'http://localhost:3000/';
 
 const useConexion = () => {
   const get = async ( token: string, url: string, params?: any) => {

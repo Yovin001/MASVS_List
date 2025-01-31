@@ -1,0 +1,28 @@
+---
+import Layout from "@layouts/Layout.astro";
+---
+<Layout title="Logout">
+    <main class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 px-6 sm:px-12 lg:px-20">
+      <section class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-2 w-full max-w-lg">
+        <div class="flex flex-col items-center justify-center">
+          <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Cerrar sesión</h1>
+          <p class="text-lg text-gray-700 dark:text-gray-300 text-center">Deseas cerrar sesión?</p>
+          <button id="logoutButton" class="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Cerrar sesión</button>
+        </div>
+      </section>
+    </main>
+  
+    <script>
+      document.getElementById('logoutButton').addEventListener('click', () => {
+        // Eliminar el token de las cookies
+        document.cookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        
+        // Eliminar el usuario de las cookies (si lo tienes almacenado)
+        document.cookie = 'user=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  
+        // Redirigir al usuario a la página de inicio o de login
+        window.location.href = '/login';
+      });
+    </script>
+  </Layout>
+  

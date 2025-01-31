@@ -1,6 +1,7 @@
 ---
 import Container from "./Container.astro";
 import Frame from "./Frame.astro";
+import {BASE_URL} from "@utiles/hooks/Conexion";
 
 const links = [
     {
@@ -8,12 +9,12 @@ const links = [
         label: "Proyectos",
     },
     {
-        to: "/#solution",
-        label: "Informes",
+        to: "/perfil",
+        label: "Perfil",
     },
     {
-        to: "/#reviews",
-        label: "Información",
+        to: "/logout",
+        label: "Cerrar Sesión",
     },
 ];
 
@@ -59,16 +60,17 @@ const links = [
                     </div>
 
                     <!-- Sección de Cerrar Sesión -->
-                    <div class="w-full my-6 border-t dark:border-[--ui-dark-border-color] pt-6 lg:mt-0 flex gap-2 lg:my-0 lg:border-none lg:pt-0">
-                        <a href="/Perfil" class="hidden lg:flex">
-                            Perfil
+                    <div class="w-full my-6 border-t dark:border-[--ui-dark-border-color] pt-6 lg:mt-0 flex items-center gap-2 lg:my-0 lg:border-none lg:pt-0">
+                        <img 
+                          src={BASE_URL + "images/users/" + Astro.cookies.get("user").json().photo} 
+                          alt="Avatar" 
+                          class="w-10 h-10 rounded-full object-cover"
+                        />
+                        <a href="/perfil" class="hidden lg:flex">
+                          {Astro.cookies.get("user").json().name}
                         </a>
+                      </div>
                       
-               
-                        <a href="/login" class="w-full md:w-fit">
-                            Get Started
-                        </a>
-                    </div>
                 </div>
             </div>
         </Container>

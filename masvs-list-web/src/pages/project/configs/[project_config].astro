@@ -14,6 +14,11 @@ export async function getStaticPaths() {
   }));
 }
 
+const token = Astro.cookies.get("token");
+const user = Astro.cookies.get("user");
+if (!token || !user) {
+  return Astro.redirect("/login");
+}
 
 import AppHeaderProject from "@components/AppHeaderProject.astro";
 import Layout from "@layouts/Layout.astro";
@@ -32,10 +37,11 @@ const fetchProjects = async () => {
     if (response?.code === 200) {
       project = response.info.project;
       typeQuestions = response.info.typeQuestions;
+    }else{
+      Astro.redirect("/dashboard");
     }
   } catch (error) {
-    console.error("Error al obtener los proyectos:", error);
-  } 
+    Astro.redirect("/dashboard"); } 
 };
 await fetchProjects();
 

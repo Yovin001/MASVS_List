@@ -111,7 +111,7 @@ class EntityController {
                 const salt = bcrypt.genSaltSync(saltRounds);
                 return bcrypt.hashSync(password, salt);
             };
-            const photoFilename = req.file ? req.file.filename : 'USUARIO_ICONO.png';
+            const photoFilename = req.file ? req.file.filename : 'USER_ICON.png';
 
             const data = {
                 first_name: req.body.first_name,
@@ -122,8 +122,7 @@ class EntityController {
                 account: {
                     email: req.body.email,
                     password: passwordHash(req.body.password), 
-                    state: 'ACEPTADO',
-                    external_id: uuid.v4()
+                    state: 'ACCEPTED',
                 },
                 role_entity: {
                     id_role: 2

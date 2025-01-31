@@ -1,0 +1,107 @@
+---
+import Container from "@components/Container.astro";
+import useConexion from "@utiles/hooks/Conexion";
+
+const conexion = useConexion();
+export interface Props {
+    proyect_report: string;
+}
+const { proyect_report } = Astro.props;
+
+// Hacer que `report` sea reactivo
+let report = [];
+
+const fetchReport = async () => {
+  try {
+    const response = await conexion.get(
+      Astro.cookies.get("token").toString(),
+      `question/report/${Astro.cookies.get("user").json().external_id}/${proyect_report}`
+    );
+
+    if (response?.code === 200) {
+      report = response.info; // Se actualiza de forma reactiva
+    }else{
+      Astro.redirect("/dashboard");
+    }
+  } catch (error) {
+    Astro.redirect("/dashboard");
+  }
+};
+await fetchReport();
+
+// Calcular métricas
+const totalReportes = report.length;
+
+const totalAprobados = report.reduce((sum, item) => sum + item.aprobado, 0);
+const totalReprobados = report.reduce((sum, item) => sum + item.reprobado, 0);
+const atributosCorrectos = report.filter(item => item.porcentaje === 100).length;
+const totalAtributos = 7;
+
+let nivelSeguridad = "Básico";
+if (atributosCorrectos >= 3 && atributosCorrectos <= 4) {
+  nivelSeguridad = "Intermedio";
+} else if (atributosCorrectos === 5 || atributosCorrectos === 6) {
+  nivelSeguridad = "Avanzado";
+} else if (atributosCorrectos === 7) {
+  nivelSeguridad = "Experto";
+} else if (atributosCorrectos === totalAtributos) {
+  nivelSeguridad = "Innovador";
+}
+---
+
+<section>
+  <Container>
+    <section class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-2">
+    <div class="mb-6">
+      <h2 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center ">Resumen de Seguridad</h2>
+      <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Puntos de seguridad registrados: <strong>{totalReportes}</strong></p>
+      <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Puntos de seguridad completados: <strong>{atributosCorrectos}</strong></p>
+      <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Items de seguridad aprobados: <strong>{' '+totalAprobados}</strong></p>
+      <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Items de seguridad no implementados: <strong>{totalReprobados}</strong></p>
+      <p class=" font-bold text-2xl  text-gray-900 dark:text-gray-100 mb-4">Madurez del sistema: <span class="text-blue-600">{nivelSeguridad}</span></p>
+    </div>
+    </section>
+
+    <section class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-2">
+      <h2 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center ">Porecentaje de implementación</h2>
+      <div class="-my-0 p-[--card-padding] overflow-hidden lg:aspect-video flex rounded-[--card-border-radius] bg-gray-100 dark:bg-[--card-dark-bg]">
+        <div class="max-w-3xl w-full h-fit m-auto space-y-1">
+          <div class="space-y-6">
+            {report.length > 0 ? (
+              report.map((item) => (
+                <div class="space-y-2" >
+                  <div class="flex justify-between text-sm font-medium">
+                    <span>{item.name}</span>
+                    <span>{item.porcentaje}%</span>
+                    <span class="text-xs text-gray-500">Items de seguridad: {item.aprobado} / {item.reprobado+item.aprobado}</span>
+                  </div>
+                  <progress value={item.porcentaje} max="100" class="w-full h-3 rounded-lg overflow-hidden bg-gray-300">
+                  </progress>
+                </div>
+              ))
+            ) : (
+              <div class="text-center text-gray-500">Cargando datos...</div>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white dark:bg-gray-800 p-7 rounded-lg shadow-md mb-2 relative">
+
+      <h2 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center ">Niveles de madurez</h2>
+      <img 
+        src="/piramitWith.png" 
+        class=" dark:hidden" 
+        alt="Pirámide White" 
+      />
+      <img 
+        src="/piramideBlack.png" 
+        class=" hidden dark:block" 
+        alt="Pirámide Dark" 
+      />
+    </section>
+    
+
+  </Container>
+</section>

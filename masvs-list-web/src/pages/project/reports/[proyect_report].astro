@@ -13,15 +13,19 @@ export async function getStaticPaths() {
     params: { proyect_report: project.external_id }, // Cambiado a `project_id`
   }));
 }
-
+const token = Astro.cookies.get("token");
+const user = Astro.cookies.get("user");
+if (!token || !user) {
+  return Astro.redirect("/login");
+}
 import AppHeaderProject from "@components/AppHeaderProject.astro";
+import ReportChart from "@components/chart/ReportChart.astro";
 import Layout from "@layouts/Layout.astro";
 import useConexion from "@utiles/hooks/Conexion";
 
 const { proyect_report } = Astro.params;
 const conexion = useConexion();
 let project;
-
 const fetchProjects = async () => {
   try {
     const response = await conexion.get(Astro.cookies.get("token").toString(),
@@ -29,9 +33,11 @@ const fetchProjects = async () => {
     );
     if (response?.code === 200) {
       project = response.info.project;
+    }else{
+      Astro.redirect("/dashboard");
     }
   } catch (error) {
-    console.error("Error al obtener los proyectos:", error);
+    Astro.redirect("/dashboard");
   } 
 };
 await fetchProjects();
@@ -42,15 +48,10 @@ await fetchProjects();
     <div class="flex flex-col items-center justify-center">
       <AppHeaderProject project_id={project.external_id} />
     </div>
-    <div>
-      <!-- Contenedor para el gráfico -->
-      <div id="chart" style="width: 100%; height: 400px;"></div>
-    </div>
+    <div >
+    <ReportChart  proyect_report={project.external_id} />
+  </div>
   </main>
 
-  <!-- Script en el cliente para inicializar el gráfico -->
-  <script>
-    
-    </script>
     
 </Layout>

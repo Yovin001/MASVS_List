@@ -13,6 +13,11 @@ export async function getStaticPaths() {
     params: { project_id: project.external_id }, // Cambiado a `project_id`
   }));
 }
+const token = Astro.cookies.get("token");
+const user = Astro.cookies.get("user");
+if (!token || !user) {
+  return Astro.redirect("/login");
+}
 import Layout from "@layouts/Layout.astro";
 import useConexion from "@utiles/hooks/Conexion";
 import QuestionContainer from "@components/container/QuestionContainer.astro";
@@ -29,10 +34,11 @@ const fetchProjects = async () => {
     );
     if (response?.code === 200) {
       project = response.info.project;
+    }else{
+      Astro.redirect("/dashboard");
     }
   } catch (error) {
-    console.error("Error al obtener los proyectos:", error);
-  } 
+    Astro.redirect("/dashboard");  } 
 };
 await fetchProjects();
 ---
@@ -41,6 +47,14 @@ await fetchProjects();
     <div class="flex flex-col items-center justify-center">
       <AppHeaderProject project_id={project.external_id} />
     </div>
+    <section class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-2">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">{project.name}</h1>
+     <div class="mb-8"> <!-- Espacio entre subtítulos -->
+      <label class="flex items-center gap-3 cursor-pointer"><span class="text-lg">{project.description}</span> </label>
+
+         </h1>
+    </section>
+
     <div class="space-y-12">
       <QuestionContainer  project_id={project.external_id}  />
     </div>
