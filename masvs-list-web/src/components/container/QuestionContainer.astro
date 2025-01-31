@@ -48,7 +48,7 @@ if (Astro.request.method === "POST") {
       Astro.cookies.get("token").toString()    );
 
     if (response?.code === 200) {
-        return Astro.redirect("/project/" + project.external_id);
+        return Astro.redirect("/project/reports/" + project.external_id);
     }
   } catch (error) {
     console.error("Error al actualizar el estado de la pregunta:", error);
