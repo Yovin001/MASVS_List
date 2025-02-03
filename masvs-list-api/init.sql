@@ -32,11 +32,11 @@ INSERT INTO role_entity (external_id, state, createdAt, updatedAt, role_id, enti
 
 INSERT INTO type_question (name, state) VALUES 
 ('Almacenamiento', true),
-('Criptografía', true),
-('Autenticación', true),
+('Criptografia', true),
+('Autenticacion', true),
 ('Red', true),
 ('Plataforma', true),
-('Código', true),
+('Codigo', true),
 ('Resiliencia', true);
 
 INSERT INTO question (state, type_question_id)  

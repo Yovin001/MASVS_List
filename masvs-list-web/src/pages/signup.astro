@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/LayoutLogin.astro";
 import useConexion from "../utiles/hooks/Conexion";
-
+export const prerender = false
 const conexion = useConexion();
 const errors = { email: "", password: "" };
 let mensajeError = "";

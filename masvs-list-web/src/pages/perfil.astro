@@ -2,7 +2,7 @@
 import Layout from "@layouts/Layout.astro";
 import {BASE_URL} from "@utiles/hooks/Conexion";
 const token = Astro.cookies.get("token");
-
+export const prerender = false
 // Obtener el usuario de las cookies
 const userCookie = Astro.cookies.get('user').json();
 
