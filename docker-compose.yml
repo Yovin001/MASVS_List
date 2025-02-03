@@ -25,7 +25,7 @@ services:
       context: ./masvs-list-web
       dockerfile: Dockerfile
     ports:
-      - "4321:4321"
+      - "80:4321"
     depends_on:
       - backend
     networks:
