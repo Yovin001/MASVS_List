@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./masvs-list-api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=db
+      - DB_USER=desarrollo
+      - DB_PASSWORD=desarrollo
+      - DB_NAME=masvs_list_db
+    depends_on:
+      - db
+    networks:
+      - app-network
+    volumes:
+      - backend_data:/usr/src/app/storage
+
+  frontend:
+    build:
+      context: ./masvs-list-web
+      dockerfile: Dockerfile
+    ports:
+      - "4321:4321"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_DATABASE: masvs_list_db
+      MYSQL_USER: desarrollo
+      MYSQL_PASSWORD: desarrollo
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db_data:
+  backend_data:
