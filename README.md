@@ -1,5 +1,3 @@
-Basándome en el contexto del codebase, veo que estás pidiendo generar un README para el proyecto MASVS_List, que es una plataforma de evaluación de seguridad móvil basada en el Mobile Application Security Verification Standard (MASVS). <cite/>
-
 # MASVS List
 
 Una plataforma web para la evaluación de seguridad de aplicaciones móviles basada en el estándar MASVS (Mobile Application Security Verification Standard). [1](#0-0) 
