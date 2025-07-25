@@ -128,6 +128,17 @@ Este proyecto implementa estándares de seguridad y calidad de código mediante:
 
 ## 📄 Licencia
 
-Proyecto enfocado en la creación de una lista de verificación de seguridad móvil para aplicaciones móviles.
+Proyecto enfocado en la creación de una lista de verificación de seguridad móvil para aplicaciones móviles. [1](#0-0) 
 
+---
 
+Para más información sobre la arquitectura específica, consulta la documentación técnica en el wiki del proyecto.
+
+## Notes
+
+Este README se basa en el análisis del codebase actual del proyecto MASVS_List. El proyecto implementa una plataforma completa de evaluación de seguridad móvil con arquitectura moderna, medidas de seguridad robustas y despliegue containerizado. La estructura modular y las herramientas de CI/CD integradas facilitan el desarrollo y mantenimiento del sistema.
+
+Wiki pages you might want to explore:
+- [Architecture (Yovin001/MASVS_List)](/wiki/Yovin001/MASVS_List#2)
+- [Authentication & Security (Yovin001/MASVS_List)](/wiki/Yovin001/MASVS_List#2.1)
+- [Frontend Application (masvs-list-web) (Yovin001/MASVS_List)](/wiki/Yovin001/MASVS_List#3)
