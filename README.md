@@ -128,9 +128,6 @@ Este proyecto implementa estándares de seguridad y calidad de código mediante:
 
 ## 📄 Licencia
 
-Proyecto enfocado en la creación de una lista de verificación de seguridad móvil para aplicaciones móviles. [1](#0-0) 
+Proyecto enfocado en la creación de una lista de verificación de seguridad móvil para aplicaciones móviles.
 
----
-
-Para más información sobre la arquitectura específica, consulta la documentación técnica en el wiki del proyecto.
 
